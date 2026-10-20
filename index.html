@@ -1,11 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>SKYBOUND — 横スクロールアクション</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
 </head>
 <body>
-    ようこそ、いらっしゃい！
+  <main class="game-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="SKYBOUND ホーム">
+        <span class="brand-mark">S</span>
+        <span>SKYBOUND <small>MINI ADVENTURE</small></span>
+      </a>
+      <div class="topbar-note"><span class="live-dot"></span> ADVENTURE MODE</div>
+    </header>
+
+    <section class="game-panel" aria-label="横スクロールアクションゲーム">
+      <div class="game-heading">
+        <div>
+          <p class="eyebrow">WORLD 01 <span>・</span> GREEN HILLS</p>
+          <h1>風の谷をかけぬけろ。</h1>
+        </div>
+        <p class="heading-note">ゴールを目指して、敵をたおそう。</p>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="game" width="960" height="540" aria-label="ゲーム画面"></canvas>
+        <div class="hud" aria-live="polite">
+          <div class="hud-card">
+            <span class="hud-label">SCORE</span>
+            <strong id="score">0000</strong>
+          </div>
+          <div class="hud-card health-card">
+            <span class="hud-label">HP</span>
+            <strong id="health" aria-label="残りライフ">♥ ♥ ♥</strong>
+          </div>
+          <div class="progress-card">
+            <span class="hud-label">DISTANCE</span>
+            <div class="progress-track"><span id="progress"></span></div>
+          </div>
+        </div>
+        <div class="game-message" id="message" hidden>
+          <div class="message-card">
+            <p class="eyebrow" id="message-kicker">READY?</p>
+            <h2 id="message-title">冒険に出発！</h2>
+            <p id="message-text">走って、ジャンプして、敵をたおそう。</p>
+            <button id="start-button" type="button">ゲームスタート <span>→</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-footer">
+        <p class="tip"><span class="tip-icon">✦</span> 敵に近づいて攻撃！ジャンプ中も攻撃できるよ。</p>
+        <div class="control-legend">
+          <span><kbd>←</kbd><kbd>→</kbd> 移動</span>
+          <span><kbd>↑</kbd> ジャンプ</span>
+          <span><kbd>Z</kbd> 攻撃</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="page-footer">小さな冒険、大きな一歩。 <span>© SKYBOUND</span></footer>
+    <nav class="touch-controls" aria-label="タッチ操作">
+      <div class="touch-group">
+        <button type="button" data-control="left" aria-label="左へ移動">←</button>
+        <button type="button" data-control="right" aria-label="右へ移動">→</button>
+      </div>
+      <div class="touch-group">
+        <button type="button" data-control="jump" aria-label="ジャンプ">JUMP</button>
+        <button type="button" data-control="attack" aria-label="攻撃">ATTACK</button>
+      </div>
+    </nav>
+  </main>
 </body>
 </html>

@@ -1,0 +1,118 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&display=swap");
+
+:root {
+  color-scheme: dark;
+  font-family: "Nunito", sans-serif;
+  background: #101827;
+  color: #f5f6f4;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --muted: #95a0af;
+  --mint: #a6efbd;
+  --line: rgba(255, 255, 255, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 50% -30%, rgba(86, 123, 155, 0.2), transparent 65%),
+    #101827;
+}
+
+button { font: inherit; }
+
+.game-shell {
+  width: min(1100px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 25px 0 18px;
+}
+
+.topbar, .brand, .game-footer, .control-legend, .control-legend span,
+.page-footer, .topbar-note {
+  display: flex;
+  align-items: center;
+}
+
+.topbar { justify-content: space-between; margin-bottom: 48px; }
+.brand { gap: 11px; color: inherit; text-decoration: none; font-weight: 900; letter-spacing: 0.12em; }
+.brand-mark {
+  display: grid;
+  width: 35px;
+  height: 35px;
+  place-items: center;
+  border: 1px solid rgba(166, 239, 189, 0.5);
+  border-radius: 11px 11px 11px 3px;
+  background: rgba(166, 239, 189, 0.1);
+  color: var(--mint);
+  font-size: 19px;
+}
+.brand small { display: block; margin-top: 2px; color: var(--muted); font: 9px "DM Mono", monospace; letter-spacing: 0.15em; }
+.topbar-note { gap: 8px; color: #b9c2cd; font: 10px "DM Mono", monospace; letter-spacing: 0.12em; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px var(--mint); }
+
+.game-panel { padding: 0 22px 18px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255, 255, 255, 0.025); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.2); }
+.game-heading { display: flex; align-items: end; justify-content: space-between; padding: 21px 2px 17px; }
+.eyebrow { margin: 0 0 7px; color: var(--mint); font: 10px "DM Mono", monospace; letter-spacing: 0.12em; }
+.eyebrow span { color: #657280; }
+h1 { margin: 0; font-size: clamp(20px, 3vw, 27px); line-height: 1.25; letter-spacing: 0.025em; }
+.heading-note { margin: 0 0 4px; color: var(--muted); font-size: 12px; }
+
+.canvas-wrap { position: relative; overflow: hidden; border: 1px solid rgba(18, 30, 42, 0.35); border-radius: 9px; background: #98d4df; }
+canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.hud { position: absolute; top: 15px; left: 16px; right: 16px; display: flex; gap: 8px; align-items: start; pointer-events: none; }
+.hud-card, .progress-card { min-width: 77px; padding: 7px 10px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 7px; background: rgba(20, 39, 49, 0.68); backdrop-filter: blur(8px); }
+.hud-label { display: block; margin-bottom: 2px; color: #c7d3d3; font: 8px "DM Mono", monospace; letter-spacing: 0.13em; }
+.hud-card strong { font: 15px "DM Mono", monospace; letter-spacing: 0.08em; }
+.health-card strong { color: #ffa9a0; letter-spacing: 0.04em; }
+.progress-card { width: min(170px, 26vw); margin-left: auto; }
+.progress-track { height: 4px; overflow: hidden; border-radius: 9px; background: rgba(255, 255, 255, 0.2); }
+.progress-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--mint); transition: width 0.15s linear; }
+
+.game-message { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(14, 28, 38, 0.34); backdrop-filter: blur(3px); }
+.game-message[hidden] { display: none; }
+.message-card { width: min(340px, calc(100% - 34px)); padding: 26px 24px 24px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; background: rgba(17, 31, 42, 0.92); text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); }
+.message-card .eyebrow { margin-bottom: 5px; }
+.message-card h2 { margin: 0 0 5px; font-size: 24px; }
+.message-card p:not(.eyebrow) { margin: 0 0 17px; color: #bbc4ca; font-size: 12px; }
+.message-card button { padding: 10px 16px; border: 0; border-radius: 7px; background: var(--mint); color: #17352b; font-weight: 900; cursor: pointer; transition: transform 0.15s, background 0.15s; }
+.message-card button:hover { transform: translateY(-2px); background: #c4f8d2; }
+.message-card button span { margin-left: 8px; }
+
+.game-footer { min-height: 47px; justify-content: space-between; gap: 12px; }
+.tip { margin: 0; color: #c6ced5; font-size: 11px; }
+.tip-icon { margin-right: 6px; color: var(--mint); }
+.control-legend { gap: 17px; }
+.control-legend span { gap: 4px; color: #a8b2be; font-size: 10px; white-space: nowrap; }
+kbd { display: inline-grid; min-width: 20px; height: 20px; padding: 0 4px; place-items: center; border: 1px solid #4a5666; border-bottom-width: 2px; border-radius: 4px; color: #e3e7e9; font: 10px "DM Mono", monospace; }
+.page-footer { justify-content: space-between; margin-top: 17px; color: #778493; font-size: 10px; }
+.page-footer span { font: 9px "DM Mono", monospace; letter-spacing: 0.08em; }
+.touch-controls { display: none; }
+
+@media (max-width: 680px) {
+  .game-shell { width: calc(100% - 24px); padding-top: 15px; }
+  .topbar { margin-bottom: 27px; }
+  .game-panel { padding: 0 10px 10px; border-radius: 12px; }
+  .game-heading { padding: 15px 2px 12px; }
+  .heading-note, .control-legend { display: none; }
+  .hud { top: 8px; left: 8px; right: 8px; gap: 5px; }
+  .hud-card, .progress-card { min-width: 58px; padding: 5px 7px; }
+  .hud-card strong { font-size: 12px; }
+  .hud-label { font-size: 7px; }
+  .game-footer { min-height: 37px; }
+  .tip { font-size: 10px; }
+  .page-footer { margin-top: 12px; }
+  .touch-controls { display: flex; justify-content: space-between; gap: 12px; padding: 13px 0 0; }
+  .touch-group { display: flex; gap: 8px; }
+  .touch-controls button { min-width: 48px; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: #1a2636; color: #edf2f2; font: 700 12px "DM Mono", monospace; touch-action: none; }
+  .touch-controls button[data-control="jump"] { color: var(--mint); }
+  .touch-controls button[data-control="attack"] { border-color: rgba(255, 158, 137, 0.35); color: #ffab98; }
+  .touch-controls button.is-pressed { background: #344457; transform: translateY(1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+}
