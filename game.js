@@ -12,11 +12,28 @@ const startButton = document.querySelector("#start-button");
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const GROUND = 454;
+const ENEMY_FLOAT_HEIGHT = 105;
 const LEVEL_END = 4800;
 const keys = new Set();
-const controls = { left: false, right: false };
-const enemies = [620, 1030, 1480, 1900, 2380, 2810, 3250, 3690, 4110, 4490]
-  .map((x, index) => ({ x, homeX: x, y: GROUND - 34, alive: true, phase: index * 1.7 }));
+const controls = { left: false, right: false, up: false, down: false };
+const enemySpots = [620, 1030, 1480, 1900, 2380, 2810, 3250, 3690, 4110, 4490];
+const platforms = enemySpots.map((x) => ({
+  x: x - 55,
+  y: GROUND - ENEMY_FLOAT_HEIGHT,
+  width: 145,
+  height: 14
+}));
+const enemies = enemySpots
+  .map((x, index) => ({
+    x,
+    homeX: x,
+    platform: platforms[index],
+    y: platforms[index].y - 34 - 130,
+    homeY: platforms[index].y - 34,
+    vy: 30,
+    alive: true,
+    phase: index * 1.7
+  }));
 
 let state = "ready";
 let score = 0;
@@ -36,11 +53,13 @@ function resetGame() {
   enemies.forEach((enemy) => {
     enemy.alive = true;
     enemy.x = enemy.homeX;
+    enemy.y = enemy.homeY - 130;
+    enemy.vy = 30;
   });
   player = {
     x: 100, y: GROUND - 48, width: 32, height: 48, vy: 0,
     facing: 1, health: 3, invulnerable: 0, attackTime: 0,
-    attackCooldown: 0, hitEnemies: new Set(), walkTime: 0
+    attackCooldown: 0, hitEnemies: new Set(), walkTime: 0, onGround: true
   };
   scoreLabel.textContent = "0000";
   healthLabel.textContent = "♥ ♥ ♥";
@@ -65,8 +84,9 @@ function startGame() {
 startButton.addEventListener("click", startGame);
 
 function jump() {
-  if (state === "playing" && Math.abs(player.y + player.height - GROUND) < 1) {
+  if (state === "playing" && player.onGround) {
     player.vy = -11.8;
+    player.onGround = false;
   }
 }
 
@@ -81,11 +101,13 @@ function setKey(key, pressed) {
   const normalized = key.toLowerCase();
   if (["arrowleft", "a"].includes(normalized)) controls.left = pressed;
   if (["arrowright", "d"].includes(normalized)) controls.right = pressed;
+  if (["arrowup", "w"].includes(normalized)) controls.up = pressed;
+  if (["arrowdown", "s"].includes(normalized)) controls.down = pressed;
 }
 
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
-  if (["arrowleft", "arrowright", "arrowup", " ", "a", "d", "w", "z", "x"].includes(key)) {
+  if (["arrowleft", "arrowright", "arrowup", "arrowdown", " ", "a", "d", "w", "s", "z", "x"].includes(key)) {
     event.preventDefault();
   }
   if (keys.has(key)) return;
@@ -106,6 +128,8 @@ window.addEventListener("blur", () => {
   keys.clear();
   controls.left = false;
   controls.right = false;
+  controls.up = false;
+  controls.down = false;
 });
 
 document.querySelectorAll("[data-control]").forEach((button) => {
@@ -113,13 +137,13 @@ document.querySelectorAll("[data-control]").forEach((button) => {
   const press = (event) => {
     event.preventDefault();
     button.classList.add("is-pressed");
-    if (control === "left" || control === "right") controls[control] = true;
+    if (["left", "right", "up", "down"].includes(control)) controls[control] = true;
     if (control === "jump") jump();
     if (control === "attack") attack();
   };
   const release = () => {
     button.classList.remove("is-pressed");
-    if (control === "left" || control === "right") controls[control] = false;
+    if (["left", "right", "up", "down"].includes(control)) controls[control] = false;
   };
   button.addEventListener("pointerdown", press);
   button.addEventListener("pointerup", release);
@@ -132,19 +156,48 @@ function update(dt) {
   elapsed += dt;
   const left = controls.left || keys.has("arrowleft") || keys.has("a");
   const right = controls.right || keys.has("arrowright") || keys.has("d");
+  const up = controls.up || keys.has("arrowup") || keys.has("w");
+  const down = controls.down || keys.has("arrowdown") || keys.has("s");
   const direction = Number(right) - Number(left);
+  const verticalDirection = Number(down) - Number(up);
 
   if (direction) {
     player.x += direction * 250 * dt;
     player.facing = direction;
     player.walkTime += dt * 12;
   }
+  const previousBottom = player.y + player.height;
+  if (verticalDirection) {
+    player.y += verticalDirection * 170 * dt;
+    player.vy = 0;
+    player.onGround = false;
+  }
   player.x = Math.max(0, Math.min(LEVEL_END, player.x));
+  player.y = Math.max(40, Math.min(GROUND - player.height, player.y));
   player.vy += 32 * dt;
   player.y += player.vy;
+
+  let landed = false;
+  if (player.vy >= 0) {
+    for (const platform of platforms) {
+      const overlapsPlatform = player.x + player.width > platform.x
+        && player.x < platform.x + platform.width;
+      if (overlapsPlatform && previousBottom <= platform.y
+        && player.y + player.height >= platform.y) {
+        player.y = platform.y - player.height;
+        player.vy = 0;
+        player.onGround = true;
+        landed = true;
+        break;
+      }
+    }
+  }
   if (player.y + player.height >= GROUND) {
     player.y = GROUND - player.height;
     player.vy = 0;
+    player.onGround = true;
+  } else if (!landed) {
+    player.onGround = false;
   }
 
   player.invulnerable = Math.max(0, player.invulnerable - dt);
@@ -156,7 +209,17 @@ function update(dt) {
     if (!enemy.alive) return;
     const gap = player.x - enemy.x;
     if (Math.abs(gap) < 300) enemy.x += Math.sign(gap) * 34 * dt;
-    enemy.x = Math.max(enemy.homeX - 95, Math.min(enemy.homeX + 95, enemy.x));
+    enemy.x = Math.max(enemy.platform.x, Math.min(enemy.platform.x + enemy.platform.width - 32, enemy.x));
+
+    const previousEnemyBottom = enemy.y + 34;
+    enemy.vy = Math.min(enemy.vy + 180 * dt, 220);
+    enemy.y += enemy.vy * dt;
+    if (enemy.vy >= 0 && previousEnemyBottom <= enemy.platform.y
+      && enemy.y + 34 >= enemy.platform.y) {
+      enemy.y = enemy.platform.y - 34;
+      enemy.vy = 0;
+    }
+
     if (Math.abs(gap) < 32 && Math.abs(player.y - enemy.y) < 32 && player.invulnerable === 0) {
       player.health -= 1;
       player.invulnerable = 1.15;
@@ -290,6 +353,21 @@ function drawGround() {
   }
 }
 
+function drawPlatforms() {
+  platforms.forEach((platform) => {
+    const x = platform.x - cameraX;
+    if (x < -platform.width || x > WIDTH) return;
+    ctx.fillStyle = "rgba(37, 62, 59, 0.16)";
+    ctx.fillRect(x + 5, platform.y + platform.height, platform.width - 10, 7);
+    roundedRect(x, platform.y, platform.width, platform.height, 5, "#755d45");
+    roundedRect(x, platform.y, platform.width, 6, 3, "#a6bf79");
+    ctx.fillStyle = "#d4c28b";
+    for (let plankX = x + 14; plankX < x + platform.width - 8; plankX += 28) {
+      ctx.fillRect(plankX, platform.y + 8, 2, 4);
+    }
+  });
+}
+
 function drawPlayer() {
   const x = player.x - cameraX;
   const y = player.y;
@@ -307,7 +385,8 @@ function drawPlayer() {
 
   ctx.fillStyle = "rgba(37, 62, 59, 0.2)";
   ctx.beginPath();
-  ctx.ellipse(16, GROUND + 2, 19, 5, 0, 0, Math.PI * 2);
+  ctx.ellipse(16, player.onGround ? player.y + player.height + 2 : GROUND + 2,
+    player.onGround ? 19 : 12, player.onGround ? 5 : 3, 0, 0, Math.PI * 2);
   ctx.fill();
 
   roundedRect(8, y + 4, 21, 19, 7, "#efbd87");
@@ -343,10 +422,12 @@ function drawPlayer() {
 
 function drawEnemy(enemy) {
   const x = enemy.x - cameraX;
-  const bob = Math.sin(elapsed * 5 + enemy.phase) * 2;
-  ctx.fillStyle = "rgba(37, 62, 59, 0.18)";
+  const bob = Math.sin(elapsed * 3.5 + enemy.phase) * 1.5;
+  const heightAboveGround = GROUND - (enemy.y + 34);
+  const shadowScale = Math.max(0.45, 1 - heightAboveGround / 260);
+  ctx.fillStyle = `rgba(37, 62, 59, ${0.18 * shadowScale})`;
   ctx.beginPath();
-  ctx.ellipse(x + 17, GROUND + 2, 19, 5, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + 17, GROUND + 2, 19 * shadowScale, 5 * shadowScale, 0, 0, Math.PI * 2);
   ctx.fill();
   roundedRect(x + 2, enemy.y + 10 + bob, 30, 23, 9, "#705c8e");
   roundedRect(x + 7, enemy.y + 4 + bob, 21, 18, 8, "#9a7bb3");
@@ -360,6 +441,7 @@ function draw() {
   ctx.save();
   if (shake > 0) ctx.translate((Math.random() - 0.5) * 7, (Math.random() - 0.5) * 5);
   drawBackground();
+  drawPlatforms();
   enemies.forEach((enemy) => {
     if (enemy.alive && enemy.x - cameraX > -50 && enemy.x - cameraX < WIDTH + 50) drawEnemy(enemy);
   });

@@ -105,9 +105,11 @@ kbd { display: inline-grid; min-width: 20px; height: 20px; padding: 0 4px; place
   .game-footer { min-height: 37px; }
   .tip { font-size: 10px; }
   .page-footer { margin-top: 12px; }
-  .touch-controls { display: flex; justify-content: space-between; gap: 12px; padding: 13px 0 0; }
+  .touch-controls { display: flex; justify-content: space-between; gap: 8px; padding: 13px 0 0; flex-wrap: wrap; }
   .touch-group { display: flex; gap: 8px; }
   .touch-controls button { min-width: 48px; min-height: 43px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: #1a2636; color: #edf2f2; font: 700 12px "DM Mono", monospace; touch-action: none; }
+  .touch-controls button[data-control="up"],
+  .touch-controls button[data-control="down"] { color: #c5eaf7; }
   .touch-controls button[data-control="jump"] { color: var(--mint); }
   .touch-controls button[data-control="attack"] { border-color: rgba(255, 158, 137, 0.35); color: #ffab98; }
   .touch-controls button.is-pressed { background: #344457; transform: translateY(1px); }
